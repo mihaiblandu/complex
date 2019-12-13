@@ -4,6 +4,8 @@ const mongodb = require('mongodb');
 import resolvers from './resolver/user'
 import user from './schema/user'
 import passport from 'passport'
+import cors from 'cors'
+
 import { googleOauth, googleCallback, googleRedirect, googleScope } from './passport'
 const app = express()
 const Port = 8081
@@ -17,6 +19,9 @@ app.get('/auth/google', googleScope)
 app.get('/auth/google/callback', googleCallback, googleRedirect)
 
 const server = new ApolloServer({
+  cors: {
+		origin: '*',			// <- allow request from all domains
+		credentials: true},		// <- enable CORS response for requests with credentials (cookies, http authentication)
     typeDefs: schema,
     resolvers,
     context: {
@@ -25,7 +30,11 @@ const server = new ApolloServer({
   });
   server.applyMiddleware({ app, path: '/graphql' });
 
-  app.get('/app', (req, res) => res.send('Hello World!'))
+  //app.use('*', cors({ origin: 'http://localhost:8081' }))
+
+  app.get('/app', (req, res) => res.send("Hello world"))
+
+  app.get(['/login','/'], (req, res) => res.redirect('/auth/google'))
 
 app.listen(Port,()=>{
     console.log('\x1Bc');
